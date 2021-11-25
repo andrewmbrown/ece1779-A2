@@ -12,6 +12,7 @@ class AwsClient:
         self.AWS_SEC_KEY = access.access_keys['AWS_SECRET_KEY']
         self.keypair_name ='ece1779-A1'
         self.security_group=['sg-05074cccdff882d74']
+        self.target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:322026937675:targetgroup/lb-1779-5000/4e14bc1d4bdc93e0"
 
         # Universally Constant Values
         self.ec2 = boto3.client('ec2',
@@ -31,7 +32,6 @@ class AwsClient:
         self.monitoring = {
             'Enabled': True
         }
-        self.target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:322026937675:targetgroup/lb-1779-5000/4e14bc1d4bdc93e0"
 
 
     def WAIT_startup_complete(self, worker_id):

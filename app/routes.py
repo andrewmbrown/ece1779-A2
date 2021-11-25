@@ -74,7 +74,7 @@ def workers():
         flash("Please login, only administrators can manage workers")
         return redirect(url_for('index'))
 
-    # call both functions for CPUUTIL + HTTP Req to generate graphs
+    # call both functions for CPUUTIL + HTTP Req data to generate graphs
     CPU_Util, ec2_instances = awscli.Cloudwatch_CpuUtil()
     HTTP_Req, ec2_instances = awscli.Cloudwatch_HTTPReq()
     
