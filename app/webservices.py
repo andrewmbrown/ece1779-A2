@@ -35,7 +35,7 @@ ec2 = bt3.resource('ec2')
 elb = bt3.resource('elbv2')
 cloudwatch = bt3.resource('cloudwatch')
 '''
-target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:322026937675:targetgroup/testgroup/831071efa81bba8d"
+target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:322026937675:targetgroup/lb-1779-5000/4e14bc1d4bdc93e0"
 # elb.register_targets(TargetGroupArn=target_group_arn, Targets=[{'Id': wid[0]['InstanceId'], 'Port':80}])
 
 def WAIT_startup_complete(worker_id):
