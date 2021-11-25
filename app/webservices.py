@@ -199,7 +199,29 @@ def EC2_decrease_workers(ratio=False, amount=0.5): # ratio=False, amount ignored
         return -1 
 
 def Cloudwatch_CPU_usage_metrics(worker_id, start_s, end_s):
-    return 
+    r = cloudwatch.get_metric_statistics(
+        Namespace='AWS/EC2',
+        MetricName='CPU_Util',
+        Dimensions=[{'Name':'Instance_Id', 'Value':worker_id}],
+        StartTime=start_s,
+        EndTime=end_s,
+        Period=60,
+        Statistics=['Maximum'],
+        Unit='Percent'
+    )
+    print("response:")
+    print(r)
+    if 'Datapoints' in r:
+        datapoints = []
+        for dp in r['Datapoints']:
+            datapoints.append([
+                int(dp['Timestamp'].timestamp() * 1000),
+                float(dp['Maximum'])
+            ])
+        print("full datapoints:")
+        print(datapoints)
+        return json.dumps(sorted(datapoints, key=lambda x: x[0]))
+    return json.dumps([[]])
 
 # testbench here with a name main 
 

@@ -21,7 +21,7 @@ def autoscaler(average_cpu_util, policy):
 
 def check_autoscaler_policy(s=120): # 120 = 2 min
     t_1 = datetime.now()
-    t_0 = t_1 - timedelta(s)
+    t_0 = t_1 - timedelta(seconds=s)
     active_targets = wbs.ELB_worker_target_status(False, True, False)
     cpu_cumulative = 0
     average_cpu_util = 0
