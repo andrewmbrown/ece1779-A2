@@ -4,7 +4,17 @@ from werkzeug.security import check_password_hash, generate_password_hash
 # authenticating users, checking active status, anonyimity, id
 from flask_login import UserMixin
 from app import login
+from datetime import datetime
 
+
+class ASPolicy(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    timeadded = db.Column(db.DateTime)
+    cpu_increase_policy = db.Column(db.Float)
+    cpu_decrease_policy = db.Column(db.Float)
+    ratio = db.Column(db.Float)
+    def __repr__(self):
+        return '<ASPolicy {}>'.format(str(self.id))
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
