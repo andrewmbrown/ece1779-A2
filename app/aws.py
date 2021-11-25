@@ -19,6 +19,7 @@ class AwsClient:
                 aws_access_key_id=self.AWS_ACC_KEY, 
                 aws_secret_access_key=self.AWS_SEC_KEY, 
                 region_name="us-east-1")
+        self.ec2client = boto3.resource('ec2', region_name='us-east-1')
         self.elb = boto3.client('elbv2',
                 aws_access_key_id=self.AWS_ACC_KEY, 
                 aws_secret_access_key=self.AWS_SEC_KEY, 
@@ -121,7 +122,8 @@ class AwsClient:
                 InstanceType=self.instance_type,
                 KeyName=self.keypair_name,
                 SecurityGroupIds=self.security_group, 
-                Monitoring=self.monitoring
+                Monitoring=self.monitoring,
+                SubnetId='subnet-0f5a7a8fd40e35995'
             )
             worker = {
                 'id': r['Instances'][0]['InstanceId'],
@@ -227,7 +229,7 @@ class AwsClient:
 
         CPU_Util = {}
 
-        ec2_instances = self.ec2.instances.filter(
+        ec2_instances = self.ec2client.instances.filter(
             Filters=[{'Name': 'instance-state-name', 'Values': ['running']}])
             
         for instance in ec2_instances:
@@ -256,14 +258,14 @@ class AwsClient:
             cpu_stats = list(map(cpu_stats.__getitem__, indexes))
             CPU_Util[instance.id] = [time_stamps, cpu_stats]
             print("CPU Util Stats:", time_stamps, cpu_stats)
-        return CPU_Util
+        return CPU_Util, ec2_instances
 
     def Cloudwatch_HTTPReq(self):
         metric_name = 'HTTP_Requests'  # cloudwatch monitoring CPU
         stats = 'Maximum'
         HTTP_Req = {}
 
-        ec2_instances = self.ec2.instances.filter(
+        ec2_instances = self.ec2client.instances.filter(
             Filters=[{'Name': 'instance-state-name', 'Values': ['running']}])  
 
         for instance in ec2_instances:
@@ -310,7 +312,7 @@ class AwsClient:
             HTTP_Req['localhost'] = [time_stamps, requests]
             for i in range(len(time_stamps)):
                 print(time_stamps[i], requests[i])
-        return HTTP_Req
+        return HTTP_Req, ec2_instances
     '''
     if __name__ == "__main__":
         r = EC2_create_worker()
