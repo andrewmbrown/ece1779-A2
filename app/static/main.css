@@ -12,4 +12,13 @@ body {
     color: #5a5c5e;
     font-weight: 500;
   }
+
+  .content-section {
+    background: #ffffff;
+    padding: 10px 20px;
+    border: 1px solid #dddddd;
+    border-radius: 3px;
+    margin-bottom: 20px;
+  }
+
   
