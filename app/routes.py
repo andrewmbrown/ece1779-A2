@@ -139,6 +139,42 @@ def decrease_workers():
     return redirect(url_for('control_workers'))
 
 
+@app.route('/autoscaler')
+def autoscaler():
+    if current_user.is_authenticated:  # only see anything if logged in
+        flash("Currently logged in")
+    else:
+        flash("Please login, only administrators can manage workers")
+        return redirect(url_for('index'))
+
+    state = 0
+    return render_template('autoscaler.html', state=state)
+
+
+@app.route('/enable_autoscaler')
+def enable_autoscaler():
+    if current_user.is_authenticated:  # only see anything if logged in
+        flash("Currently logged in")
+    else:
+        flash("Please login, only administrators can manage workers")
+        return redirect(url_for('index'))
+
+    flash("Autoscaling Enabled!")
+    return redirect(url_for('autoscaler'))
+
+
+@app.route('/disable_autoscaler')
+def disable_autoscaler():
+    if current_user.is_authenticated:  # only see anything if logged in
+        flash("Currently logged in")
+    else:
+        flash("Please login, only administrators can manage workers")
+        return redirect(url_for('index'))
+
+    flash("Autoscaling Disabled!")
+    return redirect(url_for('autoscaler'))
+
+
 @app.route('/stop',methods=['GET','POST'])
 # Stop a EC2 instance
 def stop():

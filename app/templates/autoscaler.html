@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="content-section">
+    <div class="container">
+        <center><h2>Enable Autoscaling</h2></center>
+        <br><br>
+
+        {% if state %}
+        <h2 style="color:green;">Autoscaler ON</h2>
+        {% else %}
+        <h2 style="color:red;">Autoscaler OFF</h2>
+        {% endif %}
+
+        <center><button type="button" onclick="window.location.href='{{ url_for('enable_autoscaler') }}';" class="btn btn-success">Enable</button></center>
+        <br>
+        <center><button type="button" onclick="window.location.href='{{ url_for('disable_autoscaler') }}';" class="btn btn-danger">Disable</button></center>
+</div>
+</div>
+{% endblock content %}
