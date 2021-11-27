@@ -147,8 +147,8 @@ def autoscaler():
         flash("Please login, only administrators can manage workers")
         return redirect(url_for('index'))
 
-    state = 0
-    return render_template('autoscaler.html', state=state)
+    flag = awscli.get_autoscaler_state()
+    return render_template('autoscaler.html', state=flag)
 
 
 @app.route('/enable_autoscaler')

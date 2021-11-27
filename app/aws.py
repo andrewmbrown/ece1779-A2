@@ -33,6 +33,7 @@ class AwsClient:
         self.monitoring = {
             'Enabled': True
         }
+        self.autoscaler_state = False
 
 
     def WAIT_startup_complete(self, worker_id):
@@ -322,7 +323,14 @@ class AwsClient:
     '''
 
 
-    
+    def get_autoscaler_state(self):
+        # Note: This code is placeholder, eventually will do this properly
+        if self.autoscaler_state:
+            self.autoscaler_state = False
+            return False
+        else:
+            self.autoscaler_state = True
+            return True
 
 
     
