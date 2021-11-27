@@ -290,7 +290,7 @@ class AwsClient:
             }
             response = self.cloudwatch.get_metric_statistics(
                 Period=1 * 60,
-                StartTime=datetime.utcnow() - timedelta(seconds=30 * 60),
+                StartTime=datetime.utcnow() - timedelta(seconds=30 * 60), # get datapoints for last 30 mins
                 EndTime=datetime.utcnow() - timedelta(seconds=0 * 60),
                 MetricName=metric_name,
                 Namespace='AWS/EC2',
@@ -311,9 +311,33 @@ class AwsClient:
             time_stamps = list(map(time_stamps.__getitem__, indexes))
             for stat in stats:
                 cpu_stats[stat] = list(map(cpu_stats[stat].__getitem__, indexes))
-            CPU_Util[instance.id] = [time_stamps, cpu_stats]
-            print("CPU Util Stats:", time_stamps, cpu_stats)
+            CPU_Util[instance.id] = [time_stamps, cpu_stats] # 30 datapoints for last 30 mins, each datapoint = avg or max at curr min
+            # print("CPU Util Stats:", time_stamps, cpu_stats)
         return CPU_Util, ec2_instances
+
+    def Cloudwatch_TotalTwoMinuteAverage(self):
+        cpu_util, ec2_instances = self.Cloudwatch_CpuUtil()
+        num_active_workers = len(cpu_util.keys())
+        cpu_cumulative_all_ec2 = 0
+        if num_active_workers > 0:
+            for ec2_id in cpu_util.keys():
+                max_minute_2 = 0
+                max_minute_1 = 0
+                if len(cpu_util[ec2_id][1]['Maximum']) == 1:
+                    max_minute_1 = cpu_util[ec2_id][1]['Maximum'][-1]
+                if len(cpu_util[ec2_id][1]['Maximum']) >= 1:
+                    max_minute_2 = cpu_util[ec2_id][1]['Maximum'][-2]
+                    max_minute_1 = cpu_util[ec2_id][1]['Maximum'][-1]
+                last_max_avg = (max_minute_2 + max_minute_1) / 2
+                cpu_cumulative_all_ec2 += last_max_avg
+            cpu_average_all_ec2 = cpu_cumulative_all_ec2 / num_active_workers
+            return cpu_average_all_ec2
+        else:
+            # no active workers
+            return -1
+
+
+
 
     def Cloudwatch_HTTPReq(self):
         metric_name = 'HTTP_Requests'  # cloudwatch monitoring CPU
