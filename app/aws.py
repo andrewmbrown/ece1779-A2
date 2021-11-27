@@ -16,11 +16,14 @@ class AwsClient:
         self.s3_bucket_name = 'ece1779a2g82'
 
         # Universally Constant Values
+        session = boto3.Session(
+                aws_access_key_id=self.AWS_ACC_KEY,
+                aws_secret_access_key=self.AWS_SEC_KEY)
         self.ec2 = boto3.client('ec2',
                 aws_access_key_id=self.AWS_ACC_KEY, 
                 aws_secret_access_key=self.AWS_SEC_KEY, 
                 region_name="us-east-1")
-        self.ec2resource = boto3.resource('ec2', region_name='us-east-1')
+        self.ec2resource = session.resource('ec2', region_name='us-east-1')
         self.elb = boto3.client('elbv2',
                 aws_access_key_id=self.AWS_ACC_KEY, 
                 aws_secret_access_key=self.AWS_SEC_KEY, 
@@ -29,8 +32,11 @@ class AwsClient:
                 aws_access_key_id=self.AWS_ACC_KEY, 
                 aws_secret_access_key=self.AWS_SEC_KEY, 
                 region_name="us-east-1")
-        self.s3 = boto3.resource('s3', region_name='us-east-1')
-        self.rds = boto3.client('rds', region_name='us-east-1')
+        self.s3 = session.resource('s3', region_name='us-east-1')
+        self.rds = boto3.client('rds',
+                aws_access_key_id=self.AWS_ACC_KEY, 
+                aws_secret_access_key=self.AWS_SEC_KEY,  
+                region_name='us-east-1')
         self.AMI_IMAGE_ID = "ami-03fd75f2f5a87df48"
         self.instance_type ='t2.micro'
         self.monitoring = {
@@ -268,7 +274,7 @@ class AwsClient:
 
     def Cloudwatch_CpuUtil(self):
         metric_name = 'CPUUtilization'  # cloudwatch monitoring CPU
-        stats = 'Average'
+        stats = ['Average', 'Maximum']
 
         CPU_Util = {}
 
@@ -278,14 +284,17 @@ class AwsClient:
         for instance in ec2_instances:
             # CPU Util metrics
             time_stamps = []
-            cpu_stats = []
+            cpu_stats = {
+                stats[0]:[], 
+                stats[1]:[]
+            }
             response = self.cloudwatch.get_metric_statistics(
                 Period=1 * 60,
                 StartTime=datetime.utcnow() - timedelta(seconds=30 * 60),
                 EndTime=datetime.utcnow() - timedelta(seconds=0 * 60),
                 MetricName=metric_name,
                 Namespace='AWS/EC2',
-                Statistics=[stats],
+                Statistics=stats,
                 Dimensions=[{'Name': 'InstanceId', 'Value': instance.id},]
             )
 
@@ -294,11 +303,14 @@ class AwsClient:
                 minute = point['Timestamp'].minute
                 time = hour + minute/60
                 time_stamps.append(round(time, 2))
-                cpu_stats.append(round(point['Average'], 2))
+                for stat in stats:
+                    cpu_stats[stat].append(round(point[stat], 2))
+                    cpu_stats[stat].append(round(point[stat], 2))
             indexes = list(range(len(time_stamps)))
             indexes.sort(key=time_stamps.__getitem__)
             time_stamps = list(map(time_stamps.__getitem__, indexes))
-            cpu_stats = list(map(cpu_stats.__getitem__, indexes))
+            for stat in stats:
+                cpu_stats[stat] = list(map(cpu_stats[stat].__getitem__, indexes))
             CPU_Util[instance.id] = [time_stamps, cpu_stats]
             print("CPU Util Stats:", time_stamps, cpu_stats)
         return CPU_Util, ec2_instances
