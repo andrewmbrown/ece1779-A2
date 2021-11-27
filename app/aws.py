@@ -336,9 +336,6 @@ class AwsClient:
             # no active workers
             return -1
 
-
-
-
     def Cloudwatch_HTTPReq(self):
         metric_name = 'HTTP_Requests'  # cloudwatch monitoring CPU
         stats = 'Maximum'
