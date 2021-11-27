@@ -19,7 +19,7 @@ class AwsClient:
                 aws_access_key_id=self.AWS_ACC_KEY, 
                 aws_secret_access_key=self.AWS_SEC_KEY, 
                 region_name="us-east-1")
-        self.ec2client = boto3.resource('ec2', region_name='us-east-1')
+        self.ec2resource = boto3.resource('ec2', region_name='us-east-1')
         self.elb = boto3.client('elbv2',
                 aws_access_key_id=self.AWS_ACC_KEY, 
                 aws_secret_access_key=self.AWS_SEC_KEY, 
@@ -197,6 +197,27 @@ class AwsClient:
         else:
             return -1 
 
+
+    def EC2_terminate_all_workers(self):
+        # first stop all active workers
+        while True:
+            try:
+                all_workers_stopped = self.EC2_decrease_workers()
+                time.sleep(10)
+                if all_workers_stopped == -1: break
+            except:
+                print("not able to terminate all workers")
+                return -1
+        # now terminate all stopped workers
+        try:
+            # Incredibly dangerous line, terminates EVERY ec2, this would include the manager app itself if hosted on aws ec2
+            self.ec2resource.instances.terminate()
+        except:
+            print("termination failed")
+            return -1
+        return 200
+
+
     def Cloudwatch_CPU_usage_metrics(self, worker_id, start_s, end_s):
         r = self.cloudwatch.get_metric_statistics(
             Namespace='AWS/EC2',
@@ -230,7 +251,7 @@ class AwsClient:
 
         CPU_Util = {}
 
-        ec2_instances = self.ec2client.instances.filter(
+        ec2_instances = self.ec2resource.instances.filter(
             Filters=[{'Name': 'instance-state-name', 'Values': ['running']}])
             
         for instance in ec2_instances:
@@ -266,7 +287,7 @@ class AwsClient:
         stats = 'Maximum'
         HTTP_Req = {}
 
-        ec2_instances = self.ec2client.instances.filter(
+        ec2_instances = self.ec2resource.instances.filter(
             Filters=[{'Name': 'instance-state-name', 'Values': ['running']}])  
 
         for instance in ec2_instances:
@@ -314,13 +335,7 @@ class AwsClient:
             for i in range(len(time_stamps)):
                 print(time_stamps[i], requests[i])
         return HTTP_Req, ec2_instances
-    '''
-    if __name__ == "__main__":
-        r = EC2_create_worker()
-        new_worker = r['worker']
-        state_r_1 = ec2.describe_instance_status(InstanceIds=[new_worker['id']])
-        state_r_2
-    '''
+
 
 
     def get_autoscaler_state(self):

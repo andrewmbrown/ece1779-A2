@@ -147,14 +147,14 @@ def autoscaler():
         flash("Please login, only administrators can manage workers")
         return redirect(url_for('index'))
 
-    flag = awscli.get_autoscaler_state()
-    return render_template('autoscaler.html', state=flag)
+    status = awscli.get_autoscaler_state()
+    return render_template('autoscaler.html', state=status)
 
 
 @app.route('/enable_autoscaler')
 def enable_autoscaler():
     if current_user.is_authenticated:  # only see anything if logged in
-        flash("Currently logged in")
+        pass
     else:
         flash("Please login, only administrators can manage workers")
         return redirect(url_for('index'))
@@ -166,7 +166,7 @@ def enable_autoscaler():
 @app.route('/disable_autoscaler')
 def disable_autoscaler():
     if current_user.is_authenticated:  # only see anything if logged in
-        flash("Currently logged in")
+        pass
     else:
         flash("Please login, only administrators can manage workers")
         return redirect(url_for('index'))
@@ -175,20 +175,19 @@ def disable_autoscaler():
     return redirect(url_for('autoscaler'))
 
 
+# Stop all ec2 instances, then shut down
 @app.route('/stop',methods=['GET','POST'])
-# Stop a EC2 instance
 def stop():
     if current_user.is_authenticated:  # only see anything if logged in
         flash("Currently logged in")
     else:
-        flash("Please login, only administrators stop workers")
+        flash("Please login, only administrators can stop workers")
         return redirect(url_for('index'))
 
-    ec2 = boto3.resource('ec2')
-    ###### DO NOT CHANGE THE FILTER, REMOVING IT WILL DELETE ALL INSTANCES, INCLUDING THE ASSIGNMENT 1 INSTANCE! #######
-    instances = ec2.instances.filter(
-        Filters=[{'Name': 'instance-state-name', 'Values': ['running']}]).stop()
-    ###### DO NOT CHANGE THE FILTER, REMOVING IT WILL DELETE ALL INSTANCES, INCLUDING THE ASSIGNMENT 1 INSTANCE! #######
+    # aws cli to terminate all workers
+    code = awscli.EC2_terminate_all_workers()
     
-    flash('Instances stopped/terminated successfully! Please manually restart instances from AWS to view charts.', category='success')
-    return redirect(url_for('home'))
+    if code == 200: flash("All Workers Terminated!")  # http success
+    else: flash("Unable to Terminate Workers")
+
+    return redirect(url_for('index'))

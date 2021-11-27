@@ -8,6 +8,10 @@
         <center><button type="button" onclick="window.location.href='{{ url_for('increase_workers') }}';" class="btn btn-success">Increase</button></center>
         <br>
         <center><button type="button" onclick="window.location.href='{{ url_for('decrease_workers') }}';" class="btn btn-danger">Decrease</button></center>
+        <br>
+        <center><h2>Terminate Workers and Manager App</h2></center>
+        <br>
+        <center><button type="button" onclick="window.location.href='{{ url_for('stop') }}';" class="btn btn-warning">Termiante</button></center>
 </div>
 </div>
 {% endblock content %}
