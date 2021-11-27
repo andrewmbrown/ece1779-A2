@@ -12,7 +12,7 @@ class AwsClient:
         self.AWS_SEC_KEY = access.access_keys['AWS_SECRET_KEY']
         self.keypair_name ='ece1779-A1'
         self.security_group=['sg-05074cccdff882d74']
-        self.target_group_arn = "arn:aws:elasticloadbalancing:us-east-1:322026937675:targetgroup/lb-1779-5000/4e14bc1d4bdc93e0"
+        self.target_group_arn = 'arn:aws:elasticloadbalancing:us-east-1:962907337984:targetgroup/ece1779-A2/9661f1382c6d2178'
 
         # Universally Constant Values
         self.ec2 = boto3.client('ec2',
@@ -123,7 +123,7 @@ class AwsClient:
                 KeyName=self.keypair_name,
                 SecurityGroupIds=self.security_group, 
                 Monitoring=self.monitoring,
-                SubnetId='subnet-0f5a7a8fd40e35995'
+                SubnetId='subnet-039865d4c3b7aa9a5'
             )
             worker = {
                 'id': r['Instances'][0]['InstanceId'],
@@ -155,7 +155,7 @@ class AwsClient:
 
             self.WAIT_startup_complete(w_id) # wait on the startup to complete
 
-            r_elb = self.elb.register_targets(TargetGroupArn=self.target_group_arn, Targets=[{'Id': w_id, 'Port':80}])
+            r_elb = self.elb.register_targets(TargetGroupArn=self.target_group_arn, Targets=[{'Id': w_id, 'Port':5000}])
             if r_elb:
                 if 'ResponseMetadata' in r_elb:
                     if 'HTTPStatusCode' in r_elb['ResponseMetadata']:
