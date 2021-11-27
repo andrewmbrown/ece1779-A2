@@ -305,7 +305,6 @@ class AwsClient:
                 time_stamps.append(round(time, 2))
                 for stat in stats:
                     cpu_stats[stat].append(round(point[stat], 2))
-                    cpu_stats[stat].append(round(point[stat], 2))
             indexes = list(range(len(time_stamps)))
             indexes.sort(key=time_stamps.__getitem__)
             time_stamps = list(map(time_stamps.__getitem__, indexes))
