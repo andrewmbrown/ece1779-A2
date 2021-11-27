@@ -176,7 +176,7 @@ def disable_autoscaler():
 
 
 # Stop all ec2 instances, then shut down
-@app.route('/stop',methods=['GET','POST'])
+@app.route('/stop')
 def stop():
     if current_user.is_authenticated:  # only see anything if logged in
         flash("Currently logged in")
@@ -189,5 +189,23 @@ def stop():
     
     if code == 200: flash("All Workers Terminated!")  # http success
     else: flash("Unable to Terminate Workers")
+
+    return redirect(url_for('index'))
+
+
+# delete all data on s3 and rds
+@app.route('/delete')
+def delete():
+    if current_user.is_authenticated:  # only see anything if logged in
+        pass
+    else:
+        flash("Please login, only administrators can stop workers")
+        return redirect(url_for('index'))
+
+    # aws cli to delete all worker data
+    code = awscli.S3_rds_delete_all_data()   
+    
+    if code == 200: flash("All Data Deleted")  # http success
+    else: flash("Unable to Delete Data")
 
     return redirect(url_for('index'))

@@ -13,6 +13,7 @@ class AwsClient:
         self.keypair_name ='ece1779-A1'
         self.security_group=['sg-05074cccdff882d74']
         self.target_group_arn = 'arn:aws:elasticloadbalancing:us-east-1:962907337984:targetgroup/ece1779-A2/9661f1382c6d2178'
+        self.s3_bucket_name = 's3_bucket_name'
 
         # Universally Constant Values
         self.ec2 = boto3.client('ec2',
@@ -28,6 +29,8 @@ class AwsClient:
                 aws_access_key_id=self.AWS_ACC_KEY, 
                 aws_secret_access_key=self.AWS_SEC_KEY, 
                 region_name="us-east-1")
+        self.s3 = boto3.resource('s3', region_name='us-east-1')
+        self.rds = boto3.client('rds', region_name='us-east-1')
         self.AMI_IMAGE_ID = "ami-03fd75f2f5a87df48"
         self.instance_type ='t2.micro'
         self.monitoring = {
@@ -214,6 +217,24 @@ class AwsClient:
             self.ec2resource.instances.terminate()
         except:
             print("termination failed")
+            return -1
+        return 200
+
+
+    def S3_rds_delete_all_data(self):
+        # function to delete all s3 and rds data
+        # first s3
+        try:
+            bucket = self.s3.Bucket(self.s3_bucket_name)
+            bucket.objects.all().delete()
+        except:
+            return -1
+
+        # second rds
+        try:
+            snapshot_name = self.rds.describe_db_snapshots()
+            response = self.rds.delete_db_snapshot(DBSnapshotIdentifier=snapshot_name)
+        except:
             return -1
         return 200
 

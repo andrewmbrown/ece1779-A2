@@ -12,6 +12,10 @@
         <center><h2>Terminate Workers and Manager App</h2></center>
         <br>
         <center><button type="button" onclick="window.location.href='{{ url_for('stop') }}';" class="btn btn-warning">Termiante</button></center>
+        <br>
+        <center><h2>Delete all S3 and RDS Data</h2></center>
+        <br>
+        <center><button type="button" onclick="window.location.href='{{ url_for('delete') }}';" class="btn btn-info">Delete Data</button></center>
 </div>
 </div>
 {% endblock content %}
