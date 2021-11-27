@@ -10,10 +10,10 @@ class AwsClient:
         # User Dependent Values
         self.AWS_ACC_KEY = access.access_keys['AWS_ACC_KEY']
         self.AWS_SEC_KEY = access.access_keys['AWS_SECRET_KEY']
-        self.keypair_name ='ece1779-A1'
-        self.security_group=['sg-05074cccdff882d74']
-        self.target_group_arn = 'arn:aws:elasticloadbalancing:us-east-1:962907337984:targetgroup/ece1779-A2/9661f1382c6d2178'
-        self.s3_bucket_name = 's3_bucket_name'
+        self.keypair_name ='ece1779-a2-ec2-key'
+        self.security_group=['sg-0e1f1e5bb640b7d1a']
+        self.target_group_arn = 'arn:aws:elasticloadbalancing:us-east-1:322026937675:targetgroup/lb-1779-5000/4e14bc1d4bdc93e0'
+        self.s3_bucket_name = 'ece1779a2g82'
 
         # Universally Constant Values
         self.ec2 = boto3.client('ec2',
