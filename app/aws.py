@@ -2,7 +2,7 @@ import boto3
 import json
 import time
 from datetime import datetime, timedelta
-from app import access
+from access import access_keys
 # initialize the boto3 stuff here universally
 
 class AwsClient:
