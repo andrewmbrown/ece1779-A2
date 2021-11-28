@@ -75,8 +75,8 @@ def workers():
         return redirect(url_for('index'))
 
     # call both functions for CPUUTIL + HTTP Req data to generate graphs
-    CPU_Util, ec2_instances = awscli.Cloudwatch_CpuUtil()
-    HTTP_Req, ec2_instances = awscli.Cloudwatch_HTTPReq()
+    CPU_Util, ec2_instances = awscli.Worker_Cloudwatch_CpuUtil()
+    HTTP_Req, ec2_instances = awscli.Worker_Cloudwatch_HTTPReq()
     
     # CPU_Util is a dictionary, with keys = instance_id, and values = [sorted time_stamps, cpu_utilization values]
 
