@@ -14,6 +14,8 @@ class AwsClient:
         self.security_group=['sg-0e1f1e5bb640b7d1a']
         self.target_group_arn = 'arn:aws:elasticloadbalancing:us-east-1:322026937675:targetgroup/lb-1779-5000/4e14bc1d4bdc93e0'
         self.s3_bucket_name = 'ece1779a2g82'
+        self.WORKER_MAXIMUM = 6
+        self.WORKER_MINIMUM = 1
 
         # Universally Constant Values
         session = boto3.Session(
@@ -173,7 +175,16 @@ class AwsClient:
                         return HTTP_code
             return -1 
         else:
-            return -1
+            if amount < 1:
+                print("Please use a ratio > 1 to grow")
+                return []
+            active_workers = self.ELB_worker_target_status(False, True, False)
+            extra_workers = int(len(active_workers) * amount)
+            num_new_workers = int(extra_workers - len(active_workers))
+            if num_new_workers + len(active_workers) > self.WORKER_MAXIMUM:
+                num_new_workers = self.WORKER_MAXIMUM - len(active_workers)
+            created_workers = [self.EC2_increase_workers(ratio=False) for i in range(num_new_workers)]
+            return created_workers
 
     def EC2_decrease_workers(self, ratio=False, amount=0.5): # ratio=False, amount ignored as just 1; ratio=True, amount used
         DEREG_HTTP_code = -1
@@ -204,7 +215,19 @@ class AwsClient:
                     else:
                         return 200 # HTTP OK, EVERYTHING STOPPED FINE
         else:
-            return -1 
+            if amount > 1:
+                print("Please use a ratio < 1 to shrink")
+                return []
+            active_workers = self.ELB_worker_target_status(False, True, False)
+            amount = 1 - amount 
+            # correct amount to reduce e.g. reduce 4 by 0.75 -> 4 x 0.25 = 1 so 1 worker must be left
+            # so 4 x 0.25 = 1, and num_worker_shutdown = 4 - 1 = 3
+            extra_workers = int(len(active_workers) * amount)
+            num_worker_shutdown = int(len(active_workers) - extra_workers)
+            if len(active_workers) - num_worker_shutdown < self.WORKER_MINIMUM:
+                num_worker_shutdown = len(active_workers) - self.WORKER_MINIMUM 
+            stopped_workers = [self.EC2_decrease_workers(ratio=False) for i in range(num_worker_shutdown)]
+            return stopped_workers
 
 
     def EC2_terminate_all_workers(self):
