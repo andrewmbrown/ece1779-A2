@@ -226,7 +226,7 @@ class AwsClient:
             num_worker_shutdown = int(len(active_workers) - extra_workers)
             if len(active_workers) - num_worker_shutdown < self.WORKER_MINIMUM:
                 num_worker_shutdown = len(active_workers) - self.WORKER_MINIMUM 
-            stopped_workers = [self.EC2_decrease_workers(ratio=False) for i in range(num_new_workers)]
+            stopped_workers = [self.EC2_decrease_workers(ratio=False) for i in range(num_worker_shutdown)]
             return stopped_workers
 
 
