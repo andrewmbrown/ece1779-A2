@@ -13,13 +13,15 @@ def autoscaler(average_cpu_util, policy):
     if not policy or average_cpu_util == -1:
         return -1
     elif average_cpu_util > policy['cpu-thresh-grow']:
-        # r = wbs.increase_workers(ratio=True, policy['ratio'])
+        r = A.EC2_increase_workers(True, policy['ratio-grow'])
         print(average_cpu_util, policy['cpu-thresh-grow'])
         print("Increase")
+        print(r)
     elif average_cpu_util < policy['cpu-thresh-shrink']:
-        # r = wbs.decrease_workers(ratio=True, policy['ratio'])
+        r = A.EC2_decrease_workers(True, policy['ratio-shrink'])
         print(average_cpu_util, policy['cpu-thresh-shrink'])
         print("Decrease")
+        print(r)
     else:
         print(average_cpu_util, policy['cpu-thresh-grow'], policy['cpu-thresh-shrink'])
         print("Stable")
@@ -41,8 +43,9 @@ def check_autoscaler_policy(): # 120 = 2 min
     '''
     latest_policy = {
         'cpu-thresh-grow': 50,
-        'cpu-thresh-shrink': 5,
-        'ratio': 0
+        'cpu-thresh-shrink': 2.0,
+        'ratio-grow': 2.0,
+        'ratio-shrink': 0.25
     }
     auto_resp = autoscaler(average_cpu_util, latest_policy)
     return auto_resp # 200 OK or -1 BAD 
