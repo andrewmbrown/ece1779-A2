@@ -13,6 +13,7 @@ class AwsClient:
         self.keypair_name ='ece1779-A1'
         self.security_group=['sg-05074cccdff882d74']
         self.target_group_arn = 'arn:aws:elasticloadbalancing:us-east-1:962907337984:targetgroup/ece1779-A2/9661f1382c6d2178'
+        self.loadbalancer_arn_cloudwatch = 'app/ece1779-A2/2313da3459241d6c'
         self.s3_bucket_name = 'ece1779a2g82'
         self.WORKER_MAXIMUM = 6
         self.WORKER_MINIMUM = 1
@@ -434,11 +435,44 @@ class AwsClient:
             time_stamps = list(map(time_stamps.__getitem__, indexes))
             requests = list(map(requests.__getitem__, indexes))
             HTTP_Req['localhost'] = [time_stamps, requests]
-            for i in range(len(time_stamps)):
-                print(time_stamps[i], requests[i])
+            # for i in range(len(time_stamps)):
+            #     print(time_stamps[i], requests[i])
         return HTTP_Req, ec2_instances
 
 
+    def Worker_Cloudwatch_Count(self):
+        metric_name = 'NewConnectionCount'  # cloudwatch monitoring CPU
+        stats = 'Sum'
+
+        time_stamps = []        
+        requests = []
+        workers = {}
+
+        response = self.cloudwatch.get_metric_statistics(
+                Period=1 * 60,
+                StartTime=datetime.utcnow() - timedelta(seconds=30 * 60), # get datapoints for last 30 mins
+                EndTime=datetime.utcnow() - timedelta(seconds=0 * 60),
+                MetricName=metric_name,
+                Namespace='AWS/ApplicationELB',
+                Statistics=[stats],
+                Dimensions=[{'Name': 'LoadBalancer', 'Value': self.loadbalancer_arn_cloudwatch},]
+            )
+        for point in response["Datapoints"]:
+            hour = point['Timestamp'].hour
+            minute = point['Timestamp'].minute
+            time = hour + minute/60
+            time_stamps.append(round(time, 2))
+            print("Application ELB Point: ", point['Sum'])
+            requests.append(point['Sum'])
+        indexes = list(range(len(time_stamps)))
+        indexes.sort(key=time_stamps.__getitem__)
+        time_stamps = list(map(time_stamps.__getitem__, indexes))
+        requests = list(map(requests.__getitem__, indexes))
+        workers['elb'] = [time_stamps, requests]
+        for i in range(len(time_stamps)):
+            print(time_stamps[i], requests[i])
+
+        return workers
 
     def get_autoscaler_state(self):
         # Note: This code is placeholder, eventually will do this properly

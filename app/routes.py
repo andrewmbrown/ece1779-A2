@@ -35,7 +35,9 @@ def index():
         flash("Please login, only administrators can manage workers")
         return redirect(url_for('login'))
     flash("Welcome to Manger app - Use Navigation Bar to Manage/View Workers")
-    return render_template('index.html')
+    workers = awscli.Worker_Cloudwatch_Count()
+    workers = workers['elb']
+    return render_template('index.html', workers=workers)
 
 # login page for administrator account
 @app.route('/login', methods=['GET', 'POST'])
