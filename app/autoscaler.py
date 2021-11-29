@@ -30,7 +30,7 @@ def autoscaler(average_cpu_util, policy):
 
 def check_autoscaler_policy(): # 120 = 2 min
     average_cpu_util = A.Cloudwatch_TotalTwoMinuteAverage()
-    '''
+
     db.session.commit()
     curr_policy = ASPolicy.query.order_by(ASPolicy.timeadded.desc()).first()
     latest_policy = {}
@@ -38,7 +38,8 @@ def check_autoscaler_policy(): # 120 = 2 min
         latest_policy = {
             'cpu-thresh-grow': curr_policy.cpu_grow_policy,
             'cpu-thresh-shrink': curr_policy.cpu_shrink_policy,
-            'ratio': curr_policy.cpu_ratio
+            'ratio-grow': curr_policy.cpu_ratio_grow,
+            'ratio-shrink': curr_policy.cpu_ratio_shrink
         }
     '''
     latest_policy = {
@@ -47,6 +48,7 @@ def check_autoscaler_policy(): # 120 = 2 min
         'ratio-grow': 2.0,
         'ratio-shrink': 0.25
     }
+    '''
     auto_resp = autoscaler(average_cpu_util, latest_policy)
     return auto_resp # 200 OK or -1 BAD 
 

@@ -12,7 +12,8 @@ class ASPolicy(db.Model):
     timeadded = db.Column(db.DateTime)
     cpu_increase_policy = db.Column(db.Float)
     cpu_decrease_policy = db.Column(db.Float)
-    ratio = db.Column(db.Float)
+    ratio_grow = db.Column(db.Float)
+    ratio_shrink = db.Column(db.Float)
     def __repr__(self):
         return '<ASPolicy {}>'.format(str(self.id))
 
