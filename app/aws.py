@@ -384,9 +384,11 @@ class AwsClient:
                 max_minute_1 = 0
                 if len(cpu_util[ec2_id][1]['Maximum']) == 1:
                     max_minute_1 = cpu_util[ec2_id][1]['Maximum'][-1]
-                if len(cpu_util[ec2_id][1]['Maximum']) >= 1:
+                elif len(cpu_util[ec2_id][1]['Maximum']) > 1:
                     max_minute_2 = cpu_util[ec2_id][1]['Maximum'][-2]
                     max_minute_1 = cpu_util[ec2_id][1]['Maximum'][-1]
+                    print("cpu util by minutes:")
+                    print(cpu_util[ec2_id][1]['Maximum'])
                 last_max_avg = (max_minute_2 + max_minute_1) / 2
                 cpu_cumulative_all_ec2 += last_max_avg
             cpu_average_all_ec2 = cpu_cumulative_all_ec2 / num_active_workers
