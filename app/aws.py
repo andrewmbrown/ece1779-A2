@@ -144,10 +144,10 @@ class AwsClient:
                 'monitoring': r['Instances'][0]['Monitoring'],
                 'state': r['Instances'][0]['State']
             }
-            print("Created worker: {}".format(worker['id']))
+            # print("Created worker: {}".format(worker['id']))
             return {'response': r, 'worker': worker, 'FAILED': 0}
         except:
-            print("Unable to create worker!")
+            # print("Unable to create worker!")
             return {'response': None, 'worker': None, 'FAILED': -1}
 
     def EC2_increase_workers(self, ratio=False, amount=2.0): # ratio=False, amount ignored as just 1; ratio=True, amount used
@@ -162,7 +162,7 @@ class AwsClient:
             else:
                 r = self.EC2_create_worker()
                 if r['FAILED'] == -1:
-                    print("ERROR: Could not increase workers!")
+                    # print("ERROR: Could not increase workers!")
                     return -1
                 w_id = r['worker']['id']
 
@@ -177,7 +177,7 @@ class AwsClient:
             return -1 
         else:
             if amount < 1:
-                print("Please use a ratio > 1 to grow")
+                # print("Please use a ratio > 1 to grow")
                 return []
             active_workers = self.ELB_worker_target_status(False, True, False)
             extra_workers = int(len(active_workers) * amount)
@@ -193,7 +193,7 @@ class AwsClient:
         if not ratio:
             active_workers = self.ELB_worker_target_status(get_all_targeted=False, get_active_targets=True, get_untargeted=False)
             if len(active_workers) == 0:
-                print("No workers active")
+                # print("No workers active")
                 return -1
             else:
                 w_id = active_workers[0]['id'] # deregister and stop this worker 
@@ -217,7 +217,7 @@ class AwsClient:
                         return 200 # HTTP OK, EVERYTHING STOPPED FINE
         else:
             if amount > 1:
-                print("Please use a ratio < 1 to shrink")
+                # print("Please use a ratio < 1 to shrink")
                 return []
             active_workers = self.ELB_worker_target_status(False, True, False)
             amount = 1 - amount 
@@ -239,14 +239,14 @@ class AwsClient:
                 time.sleep(10)
                 if all_workers_stopped == -1: break
             except:
-                print("not able to terminate all workers")
+                # print("not able to terminate all workers")
                 return -1
         # now terminate all stopped workers
         try:
             # Incredibly dangerous line, terminates EVERY ec2, this would include the manager app itself if hosted on aws ec2
             self.ec2resource.instances.terminate()
         except:
-            print("termination failed")
+            # print("termination failed")
             return -1
         return 200
 
@@ -280,8 +280,8 @@ class AwsClient:
             Statistics=['Maximum'],
             Unit='Percent'
         )
-        print("response:")
-        print(r)
+        # print("response:")
+        # print(r)
         if 'Datapoints' in r:
             datapoints = []
             for dp in r['Datapoints']:
@@ -289,8 +289,8 @@ class AwsClient:
                     int(dp['Timestamp'].timestamp() * 1000),
                     float(dp['Maximum'])
                 ])
-            print("full datapoints:")
-            print(datapoints)
+            # print("full datapoints:")
+            # print(datapoints)
             return json.dumps(sorted(datapoints, key=lambda x: x[0]))
         return json.dumps([[]])
 
@@ -329,7 +329,7 @@ class AwsClient:
             time_stamps = list(map(time_stamps.__getitem__, indexes))
             cpu_stats = list(map(cpu_stats.__getitem__, indexes))
             CPU_Util[instance.id] = [time_stamps, cpu_stats]
-            print("CPU Util Stats:", time_stamps, cpu_stats)
+            # print("CPU Util Stats:", time_stamps, cpu_stats)
         return CPU_Util, ec2_instances
 
 
@@ -388,8 +388,8 @@ class AwsClient:
                 elif len(cpu_util[ec2_id][1]['Maximum']) > 1:
                     max_minute_2 = cpu_util[ec2_id][1]['Maximum'][-2]
                     max_minute_1 = cpu_util[ec2_id][1]['Maximum'][-1]
-                    print("cpu util by minutes:")
-                    print(cpu_util[ec2_id][1]['Maximum'])
+                    # print("cpu util by minutes:")
+                    # print(cpu_util[ec2_id][1]['Maximum'])
                 last_max_avg = (max_minute_2 + max_minute_1) / 2
                 cpu_cumulative_all_ec2 += last_max_avg
             cpu_average_all_ec2 = cpu_cumulative_all_ec2 / num_active_workers
@@ -427,7 +427,7 @@ class AwsClient:
                 minute = point['Timestamp'].minute
                 time = hour + minute/60
                 time_stamps.append(round(time, 2))
-                print("HTTP stats: ", point['Maximum'])
+                # print("HTTP stats: ", point['Maximum'])
                 requests.append(point['Maximum'])
             
             indexes = list(range(len(time_stamps)))
@@ -462,7 +462,7 @@ class AwsClient:
             minute = point['Timestamp'].minute
             time = hour + minute/60
             time_stamps.append(round(time, 2))
-            print("Application ELB Point: ", point['Sum'])
+            # print("Application ELB Point: ", point['Sum'])
             requests.append(point['Sum'])
         indexes = list(range(len(time_stamps)))
         indexes.sort(key=time_stamps.__getitem__)
@@ -470,8 +470,8 @@ class AwsClient:
         requests = list(map(requests.__getitem__, indexes))
         workers['elb'] = [time_stamps, requests]
         for i in range(len(time_stamps)):
-            print(time_stamps[i], requests[i])
-
+            pass
+            # print(time_stamps[i], requests[i])
         return workers
 
     def get_autoscaler_state(self):
