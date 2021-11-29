@@ -20,9 +20,16 @@
                 {% endfor %}
             </p>
             <p>
-                {{ form.ratio.label }}<br>
-                {{ form.ratio(size=32) }}<br>
-                {% for error in form.ratio.errors %}
+                {{ form.ratio_grow.label }}<br>
+                {{ form.ratio_grow(size=32) }}<br>
+                {% for error in form.ratio_grow.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>
+            <p>
+                {{ form.ratio_shrink.label }}<br>
+                {{ form.ratio_shrink(size=32) }}<br>
+                {% for error in form.ratio_shrink.errors %}
                 <span style="color: red;">[{{ error }}]</span>
                 {% endfor %}
             </p>
