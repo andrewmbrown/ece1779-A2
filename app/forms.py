@@ -14,5 +14,6 @@ class LoginForm(FlaskForm):
 class AutoscaleForm(FlaskForm):
     cpu_increase_policy = StringField('Increase Policy', validators=[DataRequired()])
     cpu_decrease_policy = StringField('Decrease Policy', validators=[DataRequired()])
-    ratio = StringField('Ratio', validators=[DataRequired()])
+    ratio_grow = StringField('Ratio Grow', validators=[DataRequired()])
+    ratio_shrink = StringField('Ratio Shrink', validators=[DataRequired()])
     submit = SubmitField('Enter Policy')
