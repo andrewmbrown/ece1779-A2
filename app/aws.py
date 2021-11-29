@@ -39,7 +39,7 @@ class AwsClient:
                 aws_access_key_id=self.AWS_ACC_KEY, 
                 aws_secret_access_key=self.AWS_SEC_KEY,  
                 region_name='us-east-1')
-        self.AMI_IMAGE_ID = "ami-03fd75f2f5a87df48"
+        self.AMI_IMAGE_ID = "ami-07161a4dfeb93f0fd"
         self.instance_type ='t2.micro'
         self.monitoring = {
             'Enabled': True
@@ -134,8 +134,7 @@ class AwsClient:
                 InstanceType=self.instance_type,
                 KeyName=self.keypair_name,
                 SecurityGroupIds=self.security_group, 
-                Monitoring=self.monitoring,
-                SubnetId='subnet-039865d4c3b7aa9a5'
+                Monitoring=self.monitoring
             )
             worker = {
                 'id': r['Instances'][0]['InstanceId'],
@@ -183,7 +182,7 @@ class AwsClient:
             num_new_workers = int(extra_workers - len(active_workers))
             if num_new_workers + len(active_workers) > self.WORKER_MAXIMUM:
                 num_new_workers = self.WORKER_MAXIMUM - len(active_workers)
-            created_workers = [self.EC2_increase_workers(ratio=False) for i in range(num_new_workers)]
+            created_workers = [self.EC2_increase_workers() for i in range(num_new_workers)]
             return created_workers
 
     def EC2_decrease_workers(self, ratio=False, amount=0.5): # ratio=False, amount ignored as just 1; ratio=True, amount used
@@ -226,7 +225,7 @@ class AwsClient:
             num_worker_shutdown = int(len(active_workers) - extra_workers)
             if len(active_workers) - num_worker_shutdown < self.WORKER_MINIMUM:
                 num_worker_shutdown = len(active_workers) - self.WORKER_MINIMUM 
-            stopped_workers = [self.EC2_decrease_workers(ratio=False) for i in range(num_worker_shutdown)]
+            stopped_workers = [self.EC2_decrease_workers() for i in range(num_worker_shutdown)]
             return stopped_workers
 
 
@@ -334,7 +333,7 @@ class AwsClient:
             for stat in stats:
                 cpu_stats[stat] = list(map(cpu_stats[stat].__getitem__, indexes))
             CPU_Util[instance.id] = [time_stamps, cpu_stats] # 30 datapoints for last 30 mins, each datapoint = avg or max at curr min
-            # print("CPU Util Stats:", time_stamps, cpu_stats)
+            print("CPU Util Stats:", time_stamps, cpu_stats)
         return CPU_Util, ec2_instances
 
     def Cloudwatch_TotalTwoMinuteAverage(self):
@@ -347,9 +346,11 @@ class AwsClient:
                 max_minute_1 = 0
                 if len(cpu_util[ec2_id][1]['Maximum']) == 1:
                     max_minute_1 = cpu_util[ec2_id][1]['Maximum'][-1]
-                if len(cpu_util[ec2_id][1]['Maximum']) >= 1:
+                elif len(cpu_util[ec2_id][1]['Maximum']) > 1:
                     max_minute_2 = cpu_util[ec2_id][1]['Maximum'][-2]
                     max_minute_1 = cpu_util[ec2_id][1]['Maximum'][-1]
+                    print("cpu util by minutes:")
+                    print(cpu_util[ec2_id][1]['Maximum'])
                 last_max_avg = (max_minute_2 + max_minute_1) / 2
                 cpu_cumulative_all_ec2 += last_max_avg
             cpu_average_all_ec2 = cpu_cumulative_all_ec2 / num_active_workers
