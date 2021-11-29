@@ -292,7 +292,44 @@ class AwsClient:
             return json.dumps(sorted(datapoints, key=lambda x: x[0]))
         return json.dumps([[]])
 
-    # testbench here with a name main 
+
+    def Worker_Cloudwatch_CpuUtil(self):
+        metric_name = 'CPUUtilization'  # cloudwatch monitoring CPU
+        stats = 'Average'
+
+        CPU_Util = {}
+
+        ec2_instances = self.ec2resource.instances.filter(
+            Filters=[{'Name': 'instance-state-name', 'Values': ['running']}])
+            
+        for instance in ec2_instances:
+            # CPU Util metrics
+            time_stamps = []
+            cpu_stats = []
+            response = self.cloudwatch.get_metric_statistics(
+                Period=1 * 60,
+                StartTime=datetime.utcnow() - timedelta(seconds=30 * 60),
+                EndTime=datetime.utcnow() - timedelta(seconds=0 * 60),
+                MetricName=metric_name,
+                Namespace='AWS/EC2',
+                Statistics=[stats],
+                Dimensions=[{'Name': 'InstanceId', 'Value': instance.id},]
+            )
+
+            for point in response['Datapoints']:
+                hour = point['Timestamp'].hour
+                minute = point['Timestamp'].minute
+                time = hour + minute/60
+                time_stamps.append(round(time, 2))
+                cpu_stats.append(round(point['Average'], 2))
+            indexes = list(range(len(time_stamps)))
+            indexes.sort(key=time_stamps.__getitem__)
+            time_stamps = list(map(time_stamps.__getitem__, indexes))
+            cpu_stats = list(map(cpu_stats.__getitem__, indexes))
+            CPU_Util[instance.id] = [time_stamps, cpu_stats]
+            print("CPU Util Stats:", time_stamps, cpu_stats)
+        return CPU_Util, ec2_instances
+
 
     def Cloudwatch_CpuUtil(self):
         metric_name = 'CPUUtilization'  # cloudwatch monitoring CPU
@@ -359,7 +396,7 @@ class AwsClient:
             # no active workers
             return -1
 
-    def Cloudwatch_HTTPReq(self):
+    def Worker_Cloudwatch_HTTPReq(self):
         metric_name = 'HTTP_Requests'  # cloudwatch monitoring CPU
         stats = 'Maximum'
         HTTP_Req = {}
