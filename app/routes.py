@@ -1,11 +1,9 @@
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect
 from app import app, db, aws
 from app.models import User
 from app.forms import LoginForm, AutoscaleForm
-from werkzeug.urls import url_parse
 from flask_login import current_user, login_user
-import boto3
-import os
+
 
 # To ensure we always have an admin account we attempt to make it every time
 # manager app only has one user, the admin
@@ -124,6 +122,7 @@ def increase_workers():
 
     return redirect(url_for('control_workers'))
 
+
 @app.route('/decrease_workers')
 def decrease_workers():
     if current_user.is_authenticated:  # only see anything if logged in
@@ -153,30 +152,6 @@ def autoscaler():
         flash('New autoscaling policy set!')
     # status = awscli.get_autoscaler_state()
     return render_template('autoscaler.html', form=form)
-
-
-@app.route('/enable_autoscaler')
-def enable_autoscaler():
-    if current_user.is_authenticated:  # only see anything if logged in
-        pass
-    else:
-        flash("Please login, only administrators can manage workers")
-        return redirect(url_for('index'))
-
-    flash("Autoscaling Enabled!")
-    return redirect(url_for('autoscaler'))
-
-
-@app.route('/disable_autoscaler')
-def disable_autoscaler():
-    if current_user.is_authenticated:  # only see anything if logged in
-        pass
-    else:
-        flash("Please login, only administrators can manage workers")
-        return redirect(url_for('index'))
-
-    flash("Autoscaling Disabled!")
-    return redirect(url_for('autoscaler'))
 
 
 # Stop all ec2 instances, then shut down
