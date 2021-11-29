@@ -40,7 +40,7 @@ class AwsClient:
                 aws_access_key_id=self.AWS_ACC_KEY, 
                 aws_secret_access_key=self.AWS_SEC_KEY,  
                 region_name='us-east-1')
-        self.AMI_IMAGE_ID = "ami-04942f15a25e561c7"
+        self.AMI_IMAGE_ID = "ami-011ce461cb6f6a8db"
         self.instance_type ='t2.micro'
         self.monitoring = {
             'Enabled': True
