@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect
 from app import app, db, aws
 from app.models import User
 from app.forms import LoginForm, AutoscaleForm
-from flask_login import current_user, login_user
+from flask_login import current_user, login_user, logout_user
 
 
 # To ensure we always have an admin account we attempt to make it every time
@@ -56,6 +56,15 @@ def login():
         return redirect(url_for('index'))
     return render_template('login.html', title='Sign In', form=form)
 
+@app.route('/logout')
+def logout():
+    if current_user.is_authenticated: pass  # only see anything if logged in
+    else:
+        flash("Please login")
+        return redirect(url_for('login'))
+    logout_user()
+    flash("Successfully logged out")
+    return redirect(url_for('index'))
 
 @app.route('/workers')
 def workers():

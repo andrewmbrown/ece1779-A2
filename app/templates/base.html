@@ -22,11 +22,16 @@
     <body>
         <div class="navbar-nav">
             Manager App:
+            {% if current_user.is_anonymous %}
+            <a href="{{ url_for('index') }}">Home</a>
+            {% else %}
             <a href="{{ url_for('index') }}">Home</a>
             <a href="{{ url_for('workers') }}">Workers</a>
             <a href="{{ url_for('control_workers') }}">Control Workers</a>
             <a href="{{ url_for('autoscaler') }}">Autoscaler</a>
-            <a href="https://ece1779-A2-69503585.us-east-1.elb.amazonaws.com">Load Balancer DNS</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+            <a href="http://ece1779-A2-69503585.us-east-1.elb.amazonaws.com">Load Balancer DNS</a>
+            {% endif %}
         </div>
         <hr>
         {% with messages = get_flashed_messages() %}
