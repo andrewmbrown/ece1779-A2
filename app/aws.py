@@ -400,7 +400,7 @@ class AwsClient:
 
     def Worker_Cloudwatch_HTTPReq(self):
         metric_name = 'HTTP_Requests'  # cloudwatch monitoring CPU
-        stats = 'Maximum'
+        stats = 'Average'
 
         HTTP_Req = {}
 
@@ -418,7 +418,7 @@ class AwsClient:
                 MetricName=metric_name,
                 Namespace=metric_name,
                 Statistics=[stats],
-                Dimensions=[{'Name': 'InstanceId', 'Value': instance.id},]
+                Dimensions=[{'Name': 'Instance_ID', 'Value': instance.id},]
             )
 
             # now loop through each datapoint to get a per minute statistic
@@ -428,7 +428,7 @@ class AwsClient:
                 time = hour + minute/60
                 time_stamps.append(round(time, 2))
                 # print("HTTP stats: ", point['Maximum'])
-                requests.append(point['Maximum'])
+                requests.append(point['Average'])
             
             indexes = list(range(len(time_stamps)))
             indexes.sort(key=time_stamps.__getitem__)
