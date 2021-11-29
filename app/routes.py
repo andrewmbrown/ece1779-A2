@@ -1,7 +1,7 @@
 from flask import render_template, url_for, flash, redirect, request
 from app import app, db, aws
 from app.models import User
-from app.forms import LoginForm
+from app.forms import LoginForm, AutoscaleForm
 from werkzeug.urls import url_parse
 from flask_login import current_user, login_user
 import boto3
@@ -139,16 +139,18 @@ def decrease_workers():
     return redirect(url_for('control_workers'))
 
 
-@app.route('/autoscaler')
+@app.route('/autoscaler', methods=['GET', 'POST'])
 def autoscaler():
     if current_user.is_authenticated:  # only see anything if logged in
         flash("Currently logged in")
     else:
         flash("Please login, only administrators can manage workers")
         return redirect(url_for('index'))
-
-    status = awscli.get_autoscaler_state()
-    return render_template('autoscaler.html', state=status)
+    form = AutoscaleForm()
+    if form.validate_on_submit():  # method of this class to validate form
+        flash('New autoscaling policy set!')
+    # status = awscli.get_autoscaler_state()
+    return render_template('autoscaler.html', form=form)
 
 
 @app.route('/enable_autoscaler')

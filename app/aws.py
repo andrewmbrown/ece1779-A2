@@ -10,9 +10,9 @@ class AwsClient:
         # User Dependent Values
         self.AWS_ACC_KEY = access_keys['AWS_ACC_KEY']
         self.AWS_SEC_KEY = access_keys['AWS_SECRET_KEY']
-        self.keypair_name ='ece1779-a2-ec2-key'
-        self.security_group=['sg-0e1f1e5bb640b7d1a']
-        self.target_group_arn = 'arn:aws:elasticloadbalancing:us-east-1:322026937675:targetgroup/lb-1779-5000/4e14bc1d4bdc93e0'
+        self.keypair_name ='ece1779-A1'
+        self.security_group=['sg-05074cccdff882d74']
+        self.target_group_arn = 'arn:aws:elasticloadbalancing:us-east-1:962907337984:targetgroup/ece1779-A2/9661f1382c6d2178'
         self.s3_bucket_name = 'ece1779a2g82'
         self.WORKER_MAXIMUM = 6
         self.WORKER_MINIMUM = 1
@@ -39,7 +39,7 @@ class AwsClient:
                 aws_access_key_id=self.AWS_ACC_KEY, 
                 aws_secret_access_key=self.AWS_SEC_KEY,  
                 region_name='us-east-1')
-        self.AMI_IMAGE_ID = "ami-03fd75f2f5a87df48"
+        self.AMI_IMAGE_ID = "ami-04942f15a25e561c7"
         self.instance_type ='t2.micro'
         self.monitoring = {
             'Enabled': True
@@ -398,27 +398,16 @@ class AwsClient:
     def Worker_Cloudwatch_HTTPReq(self):
         metric_name = 'HTTP_Requests'  # cloudwatch monitoring CPU
         stats = 'Maximum'
+
         HTTP_Req = {}
 
         ec2_instances = self.ec2resource.instances.filter(
             Filters=[{'Name': 'instance-state-name', 'Values': ['running']}])  
 
         for instance in ec2_instances:
-
             # HTTP req metric
             time_stamps = []        
             requests = []
-            # using cloudwatch, get metrics from ec2 instance within a window of time
-            """
-            response, dictionary containing metrics
-            Period: 60s
-            StartTime: Start monitoring 30 mins in past from utc
-            Endtime: Stop monitoring at utc (window=30mins)
-            MetricName: name of this measurement
-            Namespace: HTTP request name
-            Statistics: Maximum value from single observation
-            Dimensions: specific instance specified
-            """
             response = self.cloudwatch.get_metric_statistics(
                 Period=1 * 60,
                 StartTime=datetime.utcnow() - timedelta(seconds=30 * 60),
@@ -426,11 +415,9 @@ class AwsClient:
                 MetricName=metric_name,
                 Namespace=metric_name,
                 Statistics=[stats],
-                Dimensions=[{'Name': 'Instance_ID','Value': instance.id},]
+                Dimensions=[{'Name': 'InstanceId', 'Value': instance.id},]
             )
 
-            requests = []
-            time_stamps = []
             # now loop through each datapoint to get a per minute statistic
             for point in response["Datapoints"]:
                 hour = point['Timestamp'].hour

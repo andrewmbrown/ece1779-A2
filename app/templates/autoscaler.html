@@ -2,18 +2,31 @@
 {% block content %}
 <div class="content-section">
     <div class="container">
-        <center><h2>Enable Autoscaling</h2></center>
-        <br><br>
-
-        {% if state %}
-        <h2 style="color:green;">Autoscaler ON</h2>
-        {% else %}
-        <h2 style="color:red;">Autoscaler OFF</h2>
-        {% endif %}
-
-        <center><button type="button" onclick="window.location.href='{{ url_for('enable_autoscaler') }}';" class="btn btn-success">Enable</button></center>
-        <br>
-        <center><button type="button" onclick="window.location.href='{{ url_for('disable_autoscaler') }}';" class="btn btn-danger">Disable</button></center>
-</div>
+        <center><h2>AutoScaling Policy</h2></center>
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }}
+            <p>
+                {{ form.cpu_increase_policy.label }}<br>
+                {{ form.cpu_increase_policy(size=32) }}<br>
+                {% for error in form.cpu_increase_policy.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>
+            <p>
+                {{ form.cpu_decrease_policy.label }}<br>
+                {{ form.cpu_decrease_policy(size=32) }}<br>
+                {% for error in form.cpu_decrease_policy.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>
+            <p>
+                {{ form.ratio.label }}<br>
+                {{ form.ratio(size=32) }}<br>
+                {% for error in form.ratio.errors %}
+                <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>
+            <p>{{ form.submit() }}</p>
+    </div>
 </div>
 {% endblock content %}

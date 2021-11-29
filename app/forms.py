@@ -10,3 +10,9 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
+
+class AutoscaleForm(FlaskForm):
+    cpu_increase_policy = StringField('Increase Policy', validators=[DataRequired()])
+    cpu_decrease_policy = StringField('Decrease Policy', validators=[DataRequired()])
+    ratio = StringField('Ratio', validators=[DataRequired()])
+    submit = SubmitField('Enter Policy')
