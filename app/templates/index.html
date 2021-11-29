@@ -2,4 +2,24 @@
 
 {% block content %}
     <h2>Workers are hosted at DNS: <a href="https://ece1779-A2-69503585.us-east-1.elb.amazonaws.com">ece1779-A2-69503585.us-east-1.elb.amazonaws.com</a></h2>
+    <br><br>
+    <tr>
+        <td><center>Worker History</center></td>
+    </tr>
+    <table style="margin-left:auto; margin-right:auto;"></table>
+    <tr>
+        <td><center><div class="ct-chart" id="chart1" style="width: 550px; height: 200px;"></div></center></td>
+    </tr>
+    </table>
+    <br> <br>
+    <script>
+        var worker_data = {
+            labels: {{ workers[0] }},
+            series: [
+                {{ workers[1] }}
+            ]
+        };
+
+        new Chartist.Line('#chart1', worker_data);
+    </script>
 {% endblock %}
