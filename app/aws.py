@@ -520,7 +520,7 @@ class AwsClient:
             indexes.sort(key=time_stamps.__getitem__)
             time_stamps = list(map(time_stamps.__getitem__, indexes))
             requests = list(map(requests.__getitem__, indexes))
-            HTTP_Req['localhost'] = [time_stamps, requests]
+            HTTP_Req[instance.id] = [time_stamps, requests]
             # for i in range(len(time_stamps)):
             #     print(time_stamps[i], requests[i])
         return HTTP_Req, ec2_instances

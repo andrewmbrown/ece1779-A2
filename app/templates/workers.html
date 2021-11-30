@@ -27,9 +27,9 @@
             ]
         };
         var HTTP_Req_data = {
-            labels: {{ HTTP_Req['localhost'][0] }},
+            labels: {{ HTTP_Req[instance_id][0] }},
             series: [
-                {{ HTTP_Req['localhost'][1] }}
+                {{ HTTP_Req[instance_id][1] }}
             ]
         };
 
