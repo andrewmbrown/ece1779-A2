@@ -10,10 +10,10 @@ class AwsClient:
         # User Dependent Values
         self.AWS_ACC_KEY = access_keys['AWS_ACC_KEY']
         self.AWS_SEC_KEY = access_keys['AWS_SECRET_KEY']
-        self.keypair_name ='ece1779-A1'
-        self.security_group=['sg-05074cccdff882d74']
-        self.target_group_arn = 'arn:aws:elasticloadbalancing:us-east-1:962907337984:targetgroup/ece1779-A2/9661f1382c6d2178'
-        self.loadbalancer_arn_cloudwatch = 'app/ece1779-A2/2313da3459241d6c'
+        self.keypair_name ='ece1779-a2-ec2-key'
+        self.security_group=['sg-0e1f1e5bb640b7d1a']
+        self.target_group_arn = 'arn:aws:elasticloadbalancing:us-east-1:322026937675:targetgroup/lb-1779-5000/4e14bc1d4bdc93e0'
+        self.loadbalancer_arn_cloudwatch = 'app/lb-1779-5000/c35ba0a409be6527'
         self.s3_bucket_name = 'ece1779a2g82'
         self.WORKER_MAXIMUM = 6
         self.WORKER_MINIMUM = 1
@@ -40,7 +40,7 @@ class AwsClient:
                 aws_access_key_id=self.AWS_ACC_KEY, 
                 aws_secret_access_key=self.AWS_SEC_KEY,  
                 region_name='us-east-1')
-        self.AMI_IMAGE_ID = "ami-011ce461cb6f6a8db"
+        self.AMI_IMAGE_ID = "ami-04942f15a25e561c7"
         self.instance_type ='t2.micro'
         self.monitoring = {
             'Enabled': True
@@ -176,8 +176,7 @@ class AwsClient:
                 InstanceType=self.instance_type,
                 KeyName=self.keypair_name,
                 SecurityGroupIds=self.security_group, 
-                Monitoring=self.monitoring,
-                SubnetId='subnet-039865d4c3b7aa9a5'
+                Monitoring=self.monitoring
             )
             worker = {
                 'id': r['Instances'][0]['InstanceId'],
