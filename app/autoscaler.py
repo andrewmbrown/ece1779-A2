@@ -8,6 +8,14 @@ import sqlite3
 A = aws.AwsClient()
 
 def autoscaler(average_cpu_util, policy):
+    '''
+    the core autoscaler function
+    
+    takes average cpu util and a policy via sqlite3 db local
+    compares and increases / decreases / keeps stable as required
+
+    return 200 if success else -1
+    '''
     if not policy or average_cpu_util == -1:
         return -1
     elif average_cpu_util > policy['cpu-thresh-grow']:
@@ -27,6 +35,17 @@ def autoscaler(average_cpu_util, policy):
     return 200
 
 def check_autoscaler_policy(): # 120 = 2 min
+    '''
+    automatic function run every 2 mins to check the autoscaler policy
+
+    gets two minute average of cpu time, then calls sqlite query
+    gets the (timeadded-sorted) last row in that data, this is the latest policy
+    puts this in a dict and sends it to the autoscaler function
+
+    if there is nothing in the db then it'll send an empty dict to be dealt with
+
+    returns: return val of autoscaler function (200 or -1)
+    '''
     average_cpu_util = A.Cloudwatch_TotalTwoMinuteAverage()
 
     con = sqlite3.connect("../app.db")
@@ -61,6 +80,13 @@ def check_autoscaler_policy(): # 120 = 2 min
     return auto_resp # 200 OK or -1 BAD 
 
 def run_continuous():
+    '''
+    continuously runs every min
+
+    scheduler sets every min then inf while loop runs pending schedules
+
+    no return
+    '''
     schedule.every().minute.do(check_autoscaler_policy)
     while True:
         schedule.run_pending()
