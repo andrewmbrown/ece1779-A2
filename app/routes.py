@@ -159,7 +159,11 @@ def autoscaler():
         return redirect(url_for('index'))
     form = AutoscaleForm()
     if form.validate_on_submit():  # method of this class to validate form
-        aspol = ASPolicy(cpu_increase_policy=99.0, cpu_decrease_policy=0.0, ratio_grow=2.0, ratio_shrink=0.5)
+        aspol = ASPolicy(
+                cpu_increase_policy=form.cpu_increase_policy.data, 
+                cpu_decrease_policy=form.cpu_decrease_policy.data, 
+                ratio_grow=form.ratio_grow.data, 
+                ratio_shrink=form.ratio_shrink.data)
         db.session.add(aspol)
         try:
             db.session.commit()
