@@ -38,11 +38,10 @@ def check_autoscaler_policy(): # 120 = 2 min
     curr_policy = {}
     if len(r) > 0:
         last_aspolicy = r[-1]
-        curr_policy['cpu_grow_policy'] = last_aspolicy[2]
-        curr_policy['cpu_shrink_policy'] = last_aspolicy[3]
-        curr_policy['cpu_ratio_grow'] = last_aspolicy[4]
-        curr_policy['cpu_ratio_shrink'] = last_aspolicy[5] 
-
+        curr_policy['cpu-thresh-grow'] = last_aspolicy[2]
+        curr_policy['cpu-thresh-shrink'] = last_aspolicy[3]
+        curr_policy['ratio-grow'] = last_aspolicy[4]
+        curr_policy['ratio-shrink'] = last_aspolicy[5] 
     '''
     if curr_policy:
         latest_policy = {
