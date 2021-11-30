@@ -49,6 +49,14 @@ class AwsClient:
 
 
     def WAIT_startup_complete(self, worker_id):
+        '''
+        function that waits for the EC2 startup to complete
+
+        needed because EC2 inst can only be added to target group 
+        when state is RUNNING and NOT PENDING 
+
+        continuously checks state every 5 seconds until returns True
+        '''
         r = self.ec2.describe_instance_status(InstanceIds=[worker_id])
         while len(r['InstanceStatuses']) == 0:
             time.sleep(5)
@@ -60,6 +68,17 @@ class AwsClient:
         return True 
 
     def ELB_filter_instances_by_ami(self): # DONE
+        '''
+        gets all workers filtered by AMI
+        keeps track of all active workers
+        used by the worker target status function to get untagged but stopped functions
+
+        returns list of workers with the self.AMI_IMAGE_ID image with following structure:
+            {
+                'id' -> EC2 id 
+                'state' -> EC2 state 
+            }
+        '''
         r = self.ec2.describe_instances()
         rr = r['Reservations']
         rel_wk = [rr[i] for i in range(len(rr)) if rr[i]['Instances'][0]['ImageId'] == self.AMI_IMAGE_ID]
@@ -70,7 +89,19 @@ class AwsClient:
         return worker_data_filtered
 
     def ELB_worker_target_status(self, get_all_targeted=True, get_active_targets=False, get_untargeted=False): # DONE
-        # pick one of get_ingroup, get_idlers, or get_all = true, inside the code 
+        '''
+        function that checks the status of EC2 workers and targets
+        three input argument variants:
+        (True, False, False) -> get all currently targeted workers
+        (False, True, False) -> get all non-draining targeted workers
+        (False, False, True) -> get all workers not in the target group (implied stopped)
+
+        returns the list of workers for each combination in the following format:
+            {
+                id -> EC2 instance id
+                health -> target group health status
+            }
+        '''
         elb_r = self.elb.describe_target_health(TargetGroupArn=self.target_group_arn)
         workers = []
         target_worker_ids = []
@@ -98,12 +129,19 @@ class AwsClient:
             return []
 
     def EC2_get_stopped_workers(self):
+        '''
+        gets all stopped workers via (False, False, True) command on worker target status (see docstring)
+        returns list of workers with worker target status function dict format but state stopped 
+        '''
         untargeted_workers = self.ELB_worker_target_status(get_all_targeted=False, get_active_targets=False, get_untargeted=True)
         stopped_workers = [worker for worker in untargeted_workers if worker['state'] == 'stopped']
         return stopped_workers
 
     def EC2_create_worker(self): # DONE
         '''
+        CREATES A WORKER via boto3
+
+        SEE BELOW for the documentation
         https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ec2.html#EC2.Client.run_instances
         r format: dict with keys:
             Groups
@@ -122,11 +160,14 @@ class AwsClient:
             ReservationId
             ResponseMetadata
             ...
+        
+        returns 
+            {
+                response -> the full boto3 ec2 run instances response dict
+                worker -> worker dict format
+                FAILED -> 0 if good -1 if failed
+            }
         '''
-        # replace below with:
-        # SecurityGroupIds=['sg-05074cccdff882d74'], 
-        # SubnetId='subnet-0f5a7a8fd40e35995',
-        # KeyName='ece1779-A1',
         try:
             r = self.ec2.run_instances(
                 ImageId=self.AMI_IMAGE_ID,
@@ -150,7 +191,22 @@ class AwsClient:
             # print("Unable to create worker!")
             return {'response': None, 'worker': None, 'FAILED': -1}
 
-    def EC2_increase_workers(self, ratio=False, amount=2.0): # ratio=False, amount ignored as just 1; ratio=True, amount used
+    def EC2_increase_workers(self, ratio=False, amount=2.0):
+        '''
+        worker increase function
+
+        clicking button on manager app -> ratio False, amount ignored
+        checks to see if any prev stopped workers, if so starts one
+        else creates one from scratch
+        uses wait function to wait for state to go pending -> running
+        then registers to target
+
+        autoscaler uses ratio and amount
+        based on policy, then recurses into non-ratio version in loop by ratio calc
+
+        return 200 if successful else -1 
+        '''
+        # ratio=False, amount ignored as just 1; ratio=True, amount used
         if not ratio:
             # increase by 1
 
@@ -187,7 +243,22 @@ class AwsClient:
             created_workers = [self.EC2_increase_workers(ratio=False) for i in range(num_new_workers)]
             return created_workers
 
-    def EC2_decrease_workers(self, ratio=False, amount=0.5): # ratio=False, amount ignored as just 1; ratio=True, amount used
+    def EC2_decrease_workers(self, ratio=False, amount=0.5):
+        '''
+        worker decrease function
+
+        clicking button on manager app -> ratio False, amount ignored
+        checks to see if any prev stopped workers, if so starts one
+        else creates one from scratch
+        uses wait function to wait for state to go pending -> running
+        then registers to target
+
+        autoscaler uses ratio and amount
+        based on policy, then recurses into non-ratio version in loop by ratio calc
+
+        return 200 if successful else -1 
+        '''
+        # ratio=False, amount ignored as just 1; ratio=True, amount used
         DEREG_HTTP_code = -1
         STOP_HTTP_code = -1
         if not ratio:
@@ -270,6 +341,9 @@ class AwsClient:
 
 
     def Cloudwatch_CPU_usage_metrics(self, worker_id, start_s, end_s):
+        '''
+        gets cloudwatch cpu metrics
+        '''
         r = self.cloudwatch.get_metric_statistics(
             Namespace='AWS/EC2',
             MetricName='CPU_Util',
@@ -296,6 +370,9 @@ class AwsClient:
 
 
     def Worker_Cloudwatch_CpuUtil(self):
+        '''
+        gets cloudwatch cpu metrics for workers
+        '''
         metric_name = 'CPUUtilization'  # cloudwatch monitoring CPU
         stats = 'Average'
 
@@ -334,6 +411,9 @@ class AwsClient:
 
 
     def Cloudwatch_CpuUtil(self):
+        '''
+        gets cloudwatch cpu metrics for average and maximum
+        '''
         metric_name = 'CPUUtilization'  # cloudwatch monitoring CPU
         stats = ['Average', 'Maximum']
 
@@ -376,6 +456,10 @@ class AwsClient:
         return CPU_Util, ec2_instances
 
     def Cloudwatch_TotalTwoMinuteAverage(self):
+        '''
+        gets last two maximum cpu percentages from cloudwatch cpu metrics for each instance
+        used for the autoscaler to determine a policy change comparative to compare the cpu percent to
+        '''
         cpu_util, ec2_instances = self.Cloudwatch_CpuUtil()
         num_active_workers = len(cpu_util.keys())
         cpu_cumulative_all_ec2 = 0
@@ -399,6 +483,9 @@ class AwsClient:
             return -1
 
     def Worker_Cloudwatch_HTTPReq(self):
+        '''
+        gets cloudwatch http requests for workers for graphing
+        '''
         metric_name = 'HTTP_Requests'  # cloudwatch monitoring CPU
         stats = 'Average'
 
@@ -441,6 +528,9 @@ class AwsClient:
 
 
     def Worker_Cloudwatch_Count(self):
+        '''
+        gets cloudwatch cpu metrics for counts
+        '''
         metric_name = 'NewConnectionCount'  # cloudwatch monitoring CPU
         stats = 'Sum'
 
@@ -475,6 +565,9 @@ class AwsClient:
         return workers
 
     def get_autoscaler_state(self):
+        '''
+        old dummy function is not used
+        '''
         # Note: This code is placeholder, eventually will do this properly
         if self.autoscaler_state:
             self.autoscaler_state = False
