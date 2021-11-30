@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms import StringField, DecimalField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired
 from app.models import User
 
@@ -12,8 +12,8 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Sign In')
 
 class AutoscaleForm(FlaskForm):
-    cpu_increase_policy = StringField('Increase Policy', validators=[DataRequired()])
-    cpu_decrease_policy = StringField('Decrease Policy', validators=[DataRequired()])
-    ratio_grow = StringField('Ratio Grow', validators=[DataRequired()])
-    ratio_shrink = StringField('Ratio Shrink', validators=[DataRequired()])
+    cpu_increase_policy = DecimalField('Increase Policy', validators=[DataRequired()])
+    cpu_decrease_policy = DecimalField('Decrease Policy', validators=[DataRequired()])
+    ratio_grow = DecimalField('Ratio Grow', validators=[DataRequired()])
+    ratio_shrink = DecimalField('Ratio Shrink', validators=[DataRequired()])
     submit = SubmitField('Enter Policy')

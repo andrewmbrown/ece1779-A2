@@ -1,6 +1,6 @@
 from flask import render_template, url_for, flash, redirect
 from app import app, db, aws
-from app.models import User
+from app.models import User, ASPolicy
 from app.forms import LoginForm, AutoscaleForm
 from flask_login import current_user, login_user, logout_user
 
@@ -19,6 +19,7 @@ def setup():
         print("added admin,username: root, password: password")
     except:
         print("Admin user account already exists")
+        db.session.rollback()
     return awscli
 
 
@@ -158,6 +159,14 @@ def autoscaler():
         return redirect(url_for('index'))
     form = AutoscaleForm()
     if form.validate_on_submit():  # method of this class to validate form
+        aspol = ASPolicy(cpu_increase_policy=99.0, cpu_decrease_policy=0.0, ratio_grow=2.0, ratio_shrink=0.5)
+        db.session.add(aspol)
+        try:
+            db.session.commit()
+        except:
+            flash('Autoscaling policy set failed')
+            db.session.rollback()
+            return redirect(url_for('index'))
         flash('New autoscaling policy set!')
     # status = awscli.get_autoscaler_state()
     return render_template('autoscaler.html', form=form)

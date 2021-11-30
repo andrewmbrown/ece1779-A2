@@ -9,7 +9,7 @@ from datetime import datetime
 
 class ASPolicy(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    timeadded = db.Column(db.DateTime)
+    timeadded = db.Column(db.DateTime, default=datetime.utcnow)
     cpu_increase_policy = db.Column(db.Float)
     cpu_decrease_policy = db.Column(db.Float)
     ratio_grow = db.Column(db.Float)
